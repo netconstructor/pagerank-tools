@@ -15,19 +15,10 @@ Requests to google where made in moment of visitors request of a site. There is 
 <h4>Function overview</h4>
 
 <ul>
-   <li>Overview of all urls with pageranks</li>
-   <li>Random requests of PageRanks</li>
     <li>Graphical statistics of all pageranks</li>
-    <li>Filter functions (Pagerank and number of show enries)</li>
-    <li>Export pageranks to CVS (MS-Excel compatible)</li>
-    <li>Adding urls to update queue for an immediate update</li>
-    <li>Order your urls by click on tablehead caption</li>
-    <li>Getting titles of urls</li>
     <li>Graphical pagerank history of urls</li>
-    <li>Old pagerank data and difference to old pagerank</li>
-    <li>Date for last and next pagerank check</li>
-    <li>Graphical pagerank</li>
-    <li>Navigation thru entries</li>
+    <li>Export pageranks to CVS (MS-Excel compatible)</li>
+    <li>Updtate email on pagerank change</li>
 </ul>
 
 PageRank is a trademark of Google, Inc.
