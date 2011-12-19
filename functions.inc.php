@@ -1,10 +1,16 @@
 <?php
 
 function fetch_pr(){
+	
 	global $wpdb;
 	global $prtools_debug;
 	global $prtools_url_table;
 	global $prtools_pr_table;
+	
+	$sql="SELECT ID FROM " . $wpdb->posts  . " WHERE post_status='publish'";
+	$published_posts = $wpdb->get_results($sql);
+	
+
 	
 	$prtools_settings=get_option('pagerank_tools_settings');
 
@@ -24,6 +30,8 @@ function fetch_pr(){
 	echo "S: ".$s."<br>";
 	echo "T: ".time()."<br>";
 	*/
+	
+	
 
 	/*
 	* Checking time of last pr request
@@ -45,58 +53,64 @@ function fetch_pr(){
 		if($prtools_debug) echo "Lastcheck of new URL have to be maximum at: " . date("d.m.Y - H:i",$lastcheck_url)."<br />";
 		if($prtools_debug) print_r_html($prtools_settings);
 		if($prtools_debug) print_r_html($url_rows);
+		
+		// Get all published urls
+		$published_blog_urls = get_blog_urls();
 	
 		/*
 		* Checking pageranks
-		***************************************/	
-
+		***************************************/
 		foreach($url_rows AS $url_row){
-			if($prtools_debug){
-				$time_start=time();
-			}
+			// If post is an actual published url
+			if( in_array( $url_row->url, $published_blog_urls) ){
 			
-			if($prtools_debug) echo $lastcheck . " > " . $prtools_settings['last_google_request']."<br />";
-			
-			if($lastcheck>$prtools_settings['last_google_request']){
-						
-				$pr=getpagerank($url_row->url);
-				
-				if($url_row->queue==1){
-					if($prtools_debug) echo "GETTING PR FOR QUEUE<br>URL: ".$url_row->url."<br />\n";
-				}else{
-					if($prtools_debug) echo "GETTING PR<br>URL: ".$url_row->url."<br />\n";
+				if($prtools_debug){
+					$time_start=time();
 				}
 				
-				if($prtools_debug){
-					$time_end=time();
-					echo "Request time: ".($time_end-$time_start)."<br />\n";
-				}	
+				if($prtools_debug) echo $lastcheck . " > " . $prtools_settings['last_google_request']."<br />";
 				
-				if($pr==""){$pr=-1;}
-	
-				// If PR is a new rank update and insert
-				
-				$actual_pr=(int) $pr;
-				$last_pr=(int) $url_row->pr;
-				
-				if($prtools_debug) echo "URL: ".$url_row->url."<br />";
-				if($prtools_debug) echo "New PR: ".$actual_pr." <br />Old PR: ".$last_pr."<br />";
-	
-				if($actual_pr!=$last_pr){
+				if($lastcheck>$prtools_settings['last_google_request']){
+							
+					$pr=getpagerank($url_row->url);
 					
-					if($prtools_debug) echo "<b>updating</b><br /><br />";	
-	
-					$diff_last_pr = $actual_pr - $last_pr;
-					$url_row->pr_entries++;
-	
-					$wpdb->update($prtools_url_table, array('lastcheck'=>time(),'lastupdate'=>time(),'pr'=>$actual_pr,'diff_last_pr'=>$diff_last_pr, 'pr_entries'=>$url_row->pr_entries, 'queue' => 0), array('url'=>$url_row->url));
-					$wpdb->insert($prtools_pr_table,array('entrydate'=>time(),'url'=>$url_row->url,'pr'=>$actual_pr));
+					if($url_row->queue==1){
+						if($prtools_debug) echo "GETTING PR FOR QUEUE<br>URL: ".$url_row->url."<br />\n";
+					}else{
+						if($prtools_debug) echo "GETTING PR<br>URL: ".$url_row->url."<br />\n";
+					}
 					
-					do_action( 'prtools_update_pr',$url_row,$actual_pr,$last_pr);
+					if($prtools_debug){
+						$time_end=time();
+						echo "Request time: ".($time_end-$time_start)."<br />\n";
+					}	
 					
-				}else{
-					if($prtools_debug) echo "<b>not updating</b><br /><br />";
-					$wpdb->update($prtools_url_table, array('lastcheck'=>time(), 'queue' => 0), array('url'=>$url_row->url));					
+					if($pr==""){$pr=-1;}
+		
+					// If PR is a new rank update and insert
+					
+					$actual_pr=(int) $pr;
+					$last_pr=(int) $url_row->pr;
+					
+					if($prtools_debug) echo "URL: ".$url_row->url."<br />";
+					if($prtools_debug) echo "New PR: ".$actual_pr." <br />Old PR: ".$last_pr."<br />";
+		
+					if($actual_pr!=$last_pr){
+						
+						if($prtools_debug) echo "<b>updating</b><br /><br />";	
+		
+						$diff_last_pr = $actual_pr - $last_pr;
+						$url_row->pr_entries++;
+		
+						$wpdb->update($prtools_url_table, array('lastcheck'=>time(),'lastupdate'=>time(),'pr'=>$actual_pr,'diff_last_pr'=>$diff_last_pr, 'pr_entries'=>$url_row->pr_entries, 'queue' => 0), array('url'=>$url_row->url));
+						$wpdb->insert($prtools_pr_table,array('entrydate'=>time(),'url'=>$url_row->url,'pr'=>$actual_pr));
+						
+						do_action( 'prtools_update_pr',$url_row,$actual_pr,$last_pr);
+						
+					}else{
+						if($prtools_debug) echo "<b>not updating</b><br /><br />";
+						$wpdb->update($prtools_url_table, array('lastcheck'=>time(), 'queue' => 0), array('url'=>$url_row->url));					
+					}
 				}
 			}
 
@@ -144,6 +158,18 @@ function fetch_pr_sidewide(){
 				$wpdb->insert($prtools_pr_table,array('entrydate'=>time(),'url'=>$url_row->url,'pr'=>$pr));
 		}	
 	}
+}
+
+function get_blog_urls(){
+	$urls = array();
+	
+	$urls= array_merge( $urls, wp_get_post_urls() );
+	$urls= array_merge( $urls, wp_get_page_urls() );
+	$urls= array_merge( $urls, wp_get_cat_urls() );
+	$urls= array_merge( $urls, wp_get_tag_urls() );	
+	$urls[]=get_bloginfo("url").'/';
+	
+	return $urls;
 }
 
 function update_url_table($update_posts=true,$update_pages=true){
