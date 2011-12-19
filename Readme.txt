@@ -3,7 +3,7 @@ Contributors: mahype, svenl77
 Tags: pagerank,page rank,rank,siterank,site rank,pr,stats,statistics,seo,google
 Requires at least: 2.9.x
 Tested up to: 3.0.4
-Stable tag:  1.1
+Stable tag:  1.1.1
 
 Monitor pageranks of your wordpress sites.
 
@@ -36,6 +36,11 @@ That's it, have fun!
 2. **Detailed URL view**
 
 == Changelog ==
+<h4>1.1.1</h4>
+<ul>
+<li>Check if an url already exists or not to prevent checking non existant URLs to google</li>
+</ul>
+
 <h4>1.1</h4>
 <ul>
 <li>Turned all pro frunctions to free</li>

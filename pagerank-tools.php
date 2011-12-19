@@ -3,7 +3,7 @@
 Plugin Name: Pagerank tools
 Plugin URI: http://themekraft.com/plugin/pagerank-tools/
 Description: Monitor pageranks of your wordpress urls. 
-Version: 1.1
+Version: 1.1.1
 Author: Sven Lehnert, Sven Wagener
 Author URI: http://themekraft.com
 */
